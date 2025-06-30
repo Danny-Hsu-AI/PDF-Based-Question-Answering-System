@@ -1,0 +1,44 @@
+from chromadb.config import Settings
+import chromadb
+import uuid
+
+# 建立 ChromaDB 資料庫
+def create_chroma_db(documents: List[str], path: str, name: str):
+    """
+    建立 ChromaDB collection，並加入文字區塊與其嵌入向量。
+    
+    參數：
+    - documents: 文字區塊的列表
+    - path: 資料庫儲存的資料夾路徑
+    - name: collection 的名稱
+    
+    回傳：
+    - client: 資料庫實體
+    - collection: 已建立或取得的 collection
+    """
+    # 初始化 ChromaDB 客戶端
+    client = chromadb.Client(Settings(
+        chroma_db_impl="duckdb+parquet",
+        persist_directory=path
+    ))
+
+    # 建立或取得 collection
+    if name in [col.name for col in client.list_collections()]:
+        collection = client.get_collection(name=name)
+    else:
+        collection = client.create_collection(name=name)
+
+    # 初始化 Gemini 向量嵌入器
+    embedder = GeminiEmbeddingFunction()
+
+    # 對每段文件進行嵌入並加入資料庫
+    ids = [str(uuid.uuid4()) for _ in documents]  # 產生唯一 ID
+    for doc_id, doc in zip(ids, documents):
+        embedding = embedder([doc])  # 注意：GeminiEmbeddingFunction 接收 list
+        collection.add(
+            ids=[doc_id],
+            documents=[doc],
+            embeddings=[embedding]
+        )
+
+    return client, collection
