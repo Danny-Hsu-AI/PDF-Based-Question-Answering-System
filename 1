@@ -1,1 +1,30 @@
-# PDF-Based-Question-Answering-System
+import re
+
+# TODO: Students implement text splitting function
+def split_text(text, max_chunk_size=500, overlap=50):
+    """
+    Split the input text into meaningful chunks.
+    Returns a list of text chunks.
+
+    - max_chunk_size: the maximum character length of each chunk.
+    - overlap: number of overlapping characters between chunks (to preserve context).
+    """
+    # Split by paragraph (two or more newlines or single long break)
+    paragraphs = re.split(r'\n{2,}|\r\n{2,}', text)
+    chunks = []
+    for para in paragraphs:
+        para = para.strip()
+        if not para:
+            continue
+        # Split further if a paragraph is too long
+        while len(para) > max_chunk_size:
+            split_pos = para.rfind('.', 0, max_chunk_size)
+            if split_pos == -1:
+                split_pos = max_chunk_size
+            chunk = para[:split_pos + 1].strip()
+            chunks.append(chunk)
+            para = para[split_pos + 1 - overlap:].strip()
+        if para:
+            chunks.append(para)
+    return chunks
+
