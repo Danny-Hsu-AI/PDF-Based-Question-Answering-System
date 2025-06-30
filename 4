@@ -1,0 +1,14 @@
+def make_rag_prompt(query: str, relevant_passage: list):
+    """
+    建構給生成模型（如 Gemini）的提示詞，讓它根據指定上下文來回答問題。
+    
+    參數：
+    - query: 使用者的問題
+    - relevant_passage: 從資料庫中擷取的相關文字段落（list）
+
+    回傳：
+    - prompt: 一個格式良好、具有語意脈絡的提示字串
+    """
+    context = "\n".join(relevant_passage)  # 將多個段落組合成一段上下文
+    prompt = f"""Based on the following information:\n{context}\n\nPlease answer this question:\n{query}"""
+    return prompt
