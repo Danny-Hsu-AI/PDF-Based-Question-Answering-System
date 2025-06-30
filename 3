@@ -1,0 +1,22 @@
+def get_relevant_passage(query: str, db, n_results: int):
+    """
+    從 ChromaDB 中查詢與使用者問題最相似的 n_results 筆資料。
+    
+    參數：
+    - query: 使用者輸入的查詢字串
+    - db: ChromaDB 的 collection 實體
+    - n_results: 要回傳的結果數量
+
+    回傳：
+    - List[str]: 最相關的文字段落
+    """
+    embedder = GeminiEmbeddingFunction()
+    query_embedding = embedder([query])  # 僅查詢一條資料，仍需放入 list
+
+    # 使用向量查詢
+    results = db.query(
+        query_embeddings=[query_embedding],
+        n_results=n_results
+    )
+
+    return results['documents'][0]  # 回傳第一筆 query 的所有結果段落
